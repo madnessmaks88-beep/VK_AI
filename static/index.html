@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Tutor — решения по высшей математике</title>
+<style>
+  :root {
+    --paper: #FBF9F3;
+    --grid-line: #E4E0D0;
+    --ink: #1F2937;
+    --ink-soft: #5B6472;
+    --chalk-teal: #1F6F5C;
+    --chalk-teal-dark: #164F42;
+    --pencil-orange: #D97438;
+    --card-shadow: rgba(31, 41, 55, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--paper);
+    /* Тетрадь в клетку - сигнатурный элемент дизайна */
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: "Georgia", "Iowan Old Style", serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 120px;
+  }
+
+  header {
+    max-width: 680px;
+    width: 100%;
+    margin-bottom: 32px;
+    text-align: left;
+    border-bottom: 2px solid var(--chalk-teal);
+    padding-bottom: 16px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.01em;
+  }
+
+  header h1 span {
+    color: var(--chalk-teal);
+  }
+
+  header p {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink-soft);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  main {
+    max-width: 680px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .placeholder {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-align: center;
+    padding: 40px 20px;
+    border: 1px dashed var(--grid-line);
+    border-radius: 6px;
+    animation: fadeIn 0.6s ease-out 0.15s both;
+  }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes riseInCentered {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes dotPulse {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  header {
+    animation: riseIn 0.5s ease-out;
+  }
+
+  .exchange {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .question-card {
+    animation: riseIn 0.35s ease-out;
+  }
+
+  .answer-card {
+    animation: riseIn 0.4s ease-out 0.08s both;
+  }
+
+  .typing-dots {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .typing-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--chalk-teal);
+    animation: dotPulse 1.2s infinite ease-in-out;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  form {
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+
+  form:focus-within {
+    box-shadow: 0 6px 24px rgba(31, 111, 92, 0.18);
+  }
+
+  button {
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  button:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  .example-chip {
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  .example-chip:active {
+    transform: scale(0.96);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .question-card {
+    align-self: flex-end;
+    max-width: 85%;
+    background: var(--chalk-teal);
+    color: white;
+    padding: 14px 18px;
+    border-radius: 14px 14px 4px 14px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.98rem;
+    box-shadow: 0 2px 8px var(--card-shadow);
+  }
+
+  .answer-card {
+    align-self: flex-start;
+    max-width: 90%;
+    background: white;
+    border: 1px solid var(--grid-line);
+    border-left: 4px solid var(--pencil-orange);
+    padding: 16px 20px;
+    border-radius: 4px 14px 14px 14px;
+    box-shadow: 0 2px 8px var(--card-shadow);
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+
+  .answer-card.loading {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .answer-card .label {
+    display: block;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--pencil-orange);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  form {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(680px, calc(100% - 32px));
+    display: flex;
+    gap: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(31, 41, 55, 0.15);
+    border: 1px solid var(--grid-line);
+    animation: riseInCentered 0.5s ease-out 0.1s both;
+  }
+
+  textarea {
+    flex: 1;
+    resize: none;
+    border: none;
+    outline: none;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.98rem;
+    padding: 10px 12px;
+    color: var(--ink);
+    background: transparent;
+    max-height: 120px;
+  }
+
+  button {
+    background: var(--chalk-teal);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 22px;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  button:hover:not(:disabled) {
+    background: var(--chalk-teal-dark);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  button:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--pencil-orange);
+    outline-offset: 2px;
+  }
+
+  .examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+    animation: fadeIn 0.6s ease-out 0.25s both;
+  }
+
+  .example-chip {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.82rem;
+    color: var(--chalk-teal-dark);
+    background: rgba(31, 111, 92, 0.08);
+    border: 1px solid rgba(31, 111, 92, 0.25);
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .example-chip:hover {
+    background: rgba(31, 111, 92, 0.15);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Math <span>Tutor</span></h1>
+  <p>Дообученная LoRA-модель на задачах по высшей математике — пределы, производные, интегралы, ряды, линейная алгебра.</p>
+</header>
+
+<main id="chat">
+  <div class="placeholder" id="placeholder">
+    Задай вопрос по высшей математике — модель ответит, опираясь на дообучение.
+  </div>
+  <div class="examples">
+    <div class="example-chip" data-q="Найди производную функции f(x) = x^3 - 2x^2 + 5">Производная x³ − 2x² + 5</div>
+    <div class="example-chip" data-q="Какие есть признаки сходимости числовых рядов?">Признаки сходимости рядов</div>
+    <div class="example-chip" data-q="Вычисли определитель матрицы [[2, 1], [3, 4]]">Определитель матрицы</div>
+  </div>
+</main>
+
+<form id="ask-form">
+  <textarea id="question-input" rows="1" placeholder="Например: вычисли предел lim(x→0) sin(x)/x" required></textarea>
+  <button type="submit" id="submit-btn">Спросить</button>
+</form>
+
+<script>
+  const chat = document.getElementById('chat');
+  const placeholder = document.getElementById('placeholder');
+  const form = document.getElementById('ask-form');
+  const input = document.getElementById('question-input');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Клик по примеру подставляет вопрос в поле ввода
+  document.querySelectorAll('.example-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      input.value = chip.dataset.q;
+      input.focus();
+    });
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const question = input.value.trim();
+    if (!question) return;
+
+    if (placeholder) placeholder.remove();
+
+    // Рисуем вопрос сразу
+    const exchange = document.createElement('div');
+    exchange.className = 'exchange';
+    exchange.innerHTML = `
+      <div class="question-card"></div>
+      <div class="answer-card loading">
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+      </div>
+    `;
+    exchange.querySelector('.question-card').textContent = question;
+    chat.appendChild(exchange);
+
+    input.value = '';
+    submitBtn.disabled = true;
+    window.scrollTo(0, document.body.scrollHeight);
+
+    try {
+      const response = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: question, max_tokens: 300 }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Сервер вернул статус ${response.status}`);
+      }
+
+      const data = await response.json();
+      const answerCard = exchange.querySelector('.answer-card');
+      answerCard.classList.remove('loading');
+      answerCard.innerHTML = '<span class="label">Решение</span>';
+      answerCard.appendChild(document.createTextNode(data.answer));
+    } catch (err) {
+      const answerCard = exchange.querySelector('.answer-card');
+      answerCard.classList.remove('loading');
+      answerCard.innerHTML = `<span class="label">Ошибка</span>Не удалось получить ответ: ${err.message}`;
+    } finally {
+      submitBtn.disabled = false;
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  });
+
+  // Enter отправляет форму, Shift+Enter - перенос строки
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      form.requestSubmit();
+    }
+  });
+</script>
+
+</body>
+</html>
